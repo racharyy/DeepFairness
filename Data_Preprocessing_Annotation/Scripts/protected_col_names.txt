@@ -1,0 +1,17 @@
+Column names Explanations:
+
+Race:
+1. White
+2. Black or African American
+3. American Indian or Alaska Native
+4. Asian
+5. Native Hawaiian or Other Pacific Islander
+6. Latino/Hispanic
+7. Other/mixed race
+
+
+Gender:
+1. Female
+2. Male
+3. Both (multiple speakers)
+4. Other
