@@ -8,17 +8,17 @@ import pymc3 as pm
 from simul_data import *
 from counterfactual_generate import *
 from pymc_model_multivariate import *
-
+from helper import *
 
 
 # a_dim=7
 # mu_a = np.zeros(a_dim)
 # cov_a = np.eye(a_dim)
 
-num_samples =1000
-trans_dim = 60
-u_dim = 30
-rating_dim = 50
+# num_samples =1000
+# trans_dim = 60
+# u_dim = 30
+# rating_dim = 50
 # N=100
 # mu_u = np.zeros(u_dim)
 # cov_u = np.eye(u_dim)
@@ -30,40 +30,81 @@ rating_dim = 50
 
 
 
-print('Generating samples from model')
+class Fairytale(object):
+	"""docstring for Fairytale"""
+	def __init__(self, data=None,u_dim=1):
+		super(Fairytale, self).__init__()
+		self.u_dim = u_dim
+		if data == None:
+			self.simulated = True
+			num_samples =1000
+			trans_dim = 60
+			rating_dim = 50
+			print('Generating samples from model')
+			self.generator = model1(u_dim,trans_dim,rating_dim)
+			self.data = self.generator.generate(num_samples)			
+			print('Generation done')
+		else:
+			self.data = data
+			self.simulated = False
 
-causal_model = model1(u_dim,trans_dim,rating_dim)
-data = causal_model.generate(num_samples)
 
-# print("transcript shape ",data["transcript"].shape)
-# print("view shape ",data["view"].shape)
-# print("a shape ",data["a"].shape)
-# print("rating shape ",data["rating"].shape)
-# # mu_rand = np.random.normal(size=10)
+	def fit_params(self,check_differences=True):
 
-print('Generation done')
+		print('Model Fitting started')
+
+		mf = model_fit(self.data,self.u_dim,'vi')
+		trace = mf.sample(1000)
+		
+		print('Model Fitting done')
+
+		if self.simulated == True and check_differences == True:
+
+			print('-------------------------------------------------------')
+			print('| Difference between the true and achieved parameters |')
+			print('-------------------------------------------------------')
+			for key in self.generator.params_dic:
+
+			    diff = np.linalg.norm(self.generator.params_dic[key]-np.mean(trace[key],axis=0)) #/ s
+			    print("Difference for ",key," is ", diff)
 
 
-print('Model Fitting started')
+		return mf,trace
 
-mf = model_fit(data,u_dim,'vi')
-trace = mf.sample(1000)
+	def counterfactual_generate(self,data):
 
-print('Model Fitting done')
+		print('Generating counterfactual_sample')
 
-print('-------------------------------------------------------')
-print('| Difference between the true and achieved parameters |')
-print('-------------------------------------------------------')
-for key in causal_model.params_dic:
+		#causal_model.params_dic.keys()
+		mf,trace = self.fit_params()
+		cfsample = counterfactual_sample(data,trace,self.u_dim)
+		return cfsample
 
-    diff = np.linalg.norm(causal_model.params_dic[key]-np.mean(trace[key],axis=0)) #/ s
-    print("Difference for ",key," is ", diff)
+	def classify(self,model,config):
+		pass
+
+
+data_dict = load_pickle('../Data/converted_data_dict.pkl')
+for key in data_dict:
+	print(len(data_dict[key]),key)	
+	data_dict[key] = np.array(data_dict[key])
+Fairmodel = Fairytale(data_dict)
+mf,trace=Fairmodel.fit_params()
+
+
+
+
+# print('Model Fitting started')
+
+# mf = model_fit(data,u_dim,'vi')
+# trace = mf.sample(1000)
+
+
+
+
     
 
-print('Generating counterfactual_sample')
 
-#causal_model.params_dic.keys()
-counterfactual_sample(data,trace,u_dim)
 
 
 

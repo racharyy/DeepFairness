@@ -52,7 +52,7 @@ def model_fit(data,u_dim,method='mcmc'):
         eta_u_transcript = pm.MatrixNormal('eta_u_transcript',colcov=cov_u, rowcov=cov_trans, shape=(trans_dim, u_dim))
         eta_u_view = pm.MvNormal('eta_u_view',mu=mu_u,cov=cov_u,shape=u_dim)
         eta_u_rating = pm.MatrixNormal('eta_u_rating',colcov=cov_u, rowcov=cov_rating, shape=(rating_dim, u_dim))
-
+        
         #effect of protected attribute
         eta_a_transcript = pm.MatrixNormal('eta_a_transcript',colcov=cov_trans, rowcov=cov_a, shape=(a_dim, trans_dim))
         eta_a_view = pm.MvNormal('eta_a_view',mu=mu_a,cov=cov_a,shape=a_dim)
@@ -80,6 +80,8 @@ def model_fit(data,u_dim,method='mcmc'):
         rating_mean = tt.dot(eta_u_rating , u) +  tt.dot(data['a'],eta_a_rating) + tt.dot(transcript, eta_transcript_rating) + tt.dot(tt.reshape(view,(-1,1)), tt.reshape(eta_view_rating,(1,-1))) 
         rating = pm.MvNormal('rating', mu= rating_mean, cov = sigma_rating_sq*np.eye(rating_dim), observed = data["rating"] ) 
         
+
+
         if method == 'mcmc':   
             step = pm.NUTS()
             #init='adapt_diag'
