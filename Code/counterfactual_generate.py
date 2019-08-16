@@ -31,7 +31,7 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
     cov_rating = np.eye(rating_dim)
     
     num_original_sample = data['view'].shape[0]
-    print('num_original_sample is ', num_original_sample)
+    print('Number of Original Data: ----> ', num_original_sample)
     
     mu_u, cov_u = np.zeros(u_dim), np.eye(u_dim)
     
@@ -76,7 +76,7 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
         u_post_mf = pm.fit(n=100)
         new_trace = u_post_mf.sample(num_extra_unobserved)
         u_list=new_trace['u']
-        print(u_list.shape)
+        #print(u_list.shape)
     
     data_with_u ={}
     data_with_u['transcript'] = np.repeat(data['transcript'],num_extra_unobserved,axis=0)
@@ -92,11 +92,13 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
         
     #ACTION part
     new_data ={} 
-    num_repeat = 14*num_extra_unobserved
+    num_counter_fact_a =11
+    num_repeat = num_counter_fact_a*num_extra_unobserved
 
     u_temp, a_temp = [], []
     for i in range(num_original_sample):
-        cur_u = np.repeat(np.array(u_list[:,i,:]),14,axis=0)
+        #print("size of u is ",np.array(u_list[:,i,:]).shape)
+        cur_u = np.repeat(np.array(u_list[:,i,:]),num_counter_fact_a,axis=0)
         #print(cur_u)
         u_temp.extend(cur_u)
         cur_a = data['a'][i]
@@ -104,21 +106,23 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
         #print(cur_a)
         x = np.nonzero(cur_a)
         #print(x[0])
-        for i in range(5):
-            for j in range(5,8):
-                a= np.zeros(8)
+        for i in range(3):
+            for j in range(3,7):
+                a= np.zeros(7)
                 if i!=x[0][0] or j!=x[0][1]:
                     a[i]=1
                     a[j]=1
                     other_a.append(a)
 
         #a_temp = np.concatenate(a_temp,other_a)
+        #print(np.array(other_a).shape)
+        other_a = np.repeat([other_a],num_extra_unobserved,axis=0).reshape(-1,7)
         a_temp.extend(other_a)
 
 
-    new_data['transcript'] = np.repeat(data['transcript'],num_repeat,axis=0).reshape(-1,trans_dim)
-    new_data['view'] = np.repeat(data['view'],num_repeat,axis=0).reshape(-1,1)
-    new_data['rating'] = np.repeat(data['rating'],num_repeat,axis=0).reshape(-1,rating_dim)
+    new_data['transcript'] = np.repeat(data['transcript'],num_repeat,axis=0)
+    new_data['view'] = np.repeat(data['view'],num_repeat,axis=0)
+    new_data['rating'] = np.repeat(data['rating'],num_repeat,axis=0)
     
 
     new_data['u'] = np.array(u_temp)
@@ -126,12 +130,16 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
 
 
 
-    for key in new_data:
-        print(key,"----",new_data[key].shape)
+    # for key in new_data:
+    #     print(key,"----",new_data[key].shape)
     
     
 #     #PREDICTION part
 #     new_data["rating"] = np.array([])
+
+
+    print("Number of Orginal Data with u: ----> ", data_with_u['a'].shape[0])
+    print("Number of counterfactual Data: ----> ", new_data['a'].shape[0])
             
     return data_with_u, new_data
 

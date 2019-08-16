@@ -33,5 +33,7 @@ def dict_to_concat_data(data_dict):
         all_data_dict['input'].append(inp)
         all_data_dict['label'].append(label)
 
+    all_data_dict['input'] = np.array(all_data_dict['input'])
+    all_data_dict['label'] = np.array(all_data_dict['label'])
 
     return all_data_dict
