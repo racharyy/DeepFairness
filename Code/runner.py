@@ -32,14 +32,14 @@ from dummyfordiscussion import *
 
 class Fairytale(object):
 	"""docstring for Fairytale"""
-	def __init__(self, data=None,u_dim=1):
+	def __init__(self, data=None,u_dim=10):
 		super(Fairytale, self).__init__()
 		self.u_dim = u_dim
 		if data == None:
 			self.simulated = True
 			num_samples =1000
-			trans_dim = 60
-			rating_dim = 50
+			trans_dim = 6
+			rating_dim = 5
 			print('Generating samples from model')
 			self.generator = model1(u_dim,trans_dim,rating_dim)
 			self.data = self.generator.generate(num_samples)			
@@ -53,7 +53,7 @@ class Fairytale(object):
 
 		print('Model Fitting started')
 
-		mf = dummy_model_fit(self.data,self.u_dim,'mcmc')
+		mf = model_fit(self.data,self.u_dim,'vi')
 		trace = mf.sample(1000)
 		
 		print('Model Fitting done')
@@ -77,8 +77,8 @@ class Fairytale(object):
 
 		#causal_model.params_dic.keys()
 		mf,trace = self.fit_params()
-		cfsample = counterfactual_sample(data,trace,self.u_dim)
-		return cfsample
+		data_with_u, cfsample = counterfactual_sample(data,trace,self.u_dim)
+		return data_with_u, cfsample
 
 	def classify(self,model,config):
 		pass
@@ -88,10 +88,12 @@ data_dict = load_pickle('../Data/converted_data_dict.pkl')
 for key in data_dict:
 	print(len(data_dict[key]),key)	
 	data_dict[key] = np.array(data_dict[key])
-Fairmodel = Fairytale(data_dict)
-mf,trace=Fairmodel.fit_params()
-
-
+Fairmodel = Fairytale()
+#mf,trace=Fairmodel.fit_params()
+data = Fairmodel.data
+data_with_u, cfsample = Fairmodel.counterfactual_generate(data)
+true_data = dict_to_concat_data(data_with_u)
+print(true_data['input'].shape)
 
 
 # print('Model Fitting started')

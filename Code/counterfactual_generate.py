@@ -73,12 +73,21 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
         rating_mean = tt.dot(u,np.transpose(eta_u_rating)) +  tt.dot(data['a'],eta_a_rating) + tt.dot(transcript, eta_transcript_rating) + tt.dot(tt.reshape(view,(-1,1)), tt.reshape(eta_view_rating,(1,-1))) 
         rating = pm.MvNormal('rating', mu= rating_mean, cov = sigma_rating_sq*np.eye(rating_dim), observed = data["rating"] ) 
         
-        u_post_mf = pm.fit(n=10000)
+        u_post_mf = pm.fit(n=100)
         new_trace = u_post_mf.sample(num_extra_unobserved)
         u_list=new_trace['u']
         print(u_list.shape)
     
-    
+    data_with_u ={}
+    data_with_u['transcript'] = np.repeat(data['transcript'],num_extra_unobserved,axis=0)
+    data_with_u['view'] = np.repeat(data['view'],num_extra_unobserved,axis=0)
+    data_with_u['rating'] = np.repeat(data['rating'],num_extra_unobserved,axis=0)
+    data_with_u['a'] = np.repeat(data['a'],num_extra_unobserved,axis=0)
+    data_with_u['u'] = u_list.transpose([1,0,2]).reshape(-1,u_dim)
+
+
+
+
 
         
     #ACTION part
@@ -124,6 +133,6 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
 #     #PREDICTION part
 #     new_data["rating"] = np.array([])
             
-    return new_data
+    return data_with_u, new_data
 
 
