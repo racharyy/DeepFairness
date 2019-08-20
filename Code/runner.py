@@ -9,7 +9,7 @@ from simul_data import *
 from counterfactual_generate import *
 from pymc_model_multivariate import *
 from helper import *
-from dummyfordiscussion import *
+#from dummyfordiscussion import *
 
 # a_dim=7
 # mu_a = np.zeros(a_dim)
@@ -53,7 +53,7 @@ class Fairytale(object):
 
 		print('Model Fitting started')
 
-		mf = dummy_model_fit(self.data,self.u_dim,'mcmc')
+		mf = model_fit(self.data,self.u_dim,'mcmc')
 		trace = mf.sample(1000)
 		
 		print('Model Fitting done')

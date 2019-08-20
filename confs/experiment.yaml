@@ -1,0 +1,20 @@
+{
+  "model_type": "SimpleMLP",
+  "model_params": {
+    "in_size": 100,
+    "hidden_size": 16,
+    "out_size": 14,
+    "dropout": 0.1
+  },
+  "loss_function_name": "BCEWithLogitsLoss",
+  "optimizer": "Adam",
+  "optimizer_params": {
+    "weight_decay": 0.0001
+  },
+  #"optimizer": "SGD",
+  #"optimizer_params": {
+  #  "lr": 0.01,
+  #  "momentum": 0.9
+  #},
+  "max_epocs":10
+}
