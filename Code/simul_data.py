@@ -40,9 +40,9 @@ class model1(object):
         params_dic["eta_u_rating"] = np.random.normal(size=(rating_dim, u_dim))
 
         #effect of protected attiributes on transcript, view and rating
-        params_dic["eta_a_transcript"] = np.random.normal(size=(8,trans_dim))
-        params_dic["eta_a_view"] = np.random.normal(size=8)
-        params_dic["eta_a_rating"] = np.random.normal(size=(8,rating_dim))
+        params_dic["eta_a_transcript"] = np.random.normal(size=(7,trans_dim))
+        params_dic["eta_a_view"] = np.random.normal(size=7)
+        params_dic["eta_a_rating"] = np.random.normal(size=(7,rating_dim))
 
         #effect of transcript on view and rating
         params_dic["eta_transcript_view"] = np.random.normal(size = trans_dim)
@@ -57,11 +57,11 @@ class model1(object):
         self.params_dic = params_dic
 
     def rand_vect(self):
-        i = np.random.randint(5)
-        j = np.random.randint(3)
-        a = np.zeros(8)
+        i = np.random.randint(3)
+        j = np.random.randint(4)
+        a = np.zeros(7)
         a[i]=1
-        a[5+j]=1
+        a[3+j]=1
         return a
 
 

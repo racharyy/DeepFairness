@@ -40,7 +40,6 @@ import torch.optim as optim
 
 
 class Experiment(object):
-  
   def __init__(self, config):
     super(Experiment, self).__init__()
     self.config = config
@@ -59,22 +58,37 @@ class Experiment(object):
       torch.cuda.manual_seed(seed)
 
 
-  def setup_data_loader(self,data_loc):
-    
+	def setup_data_loader(self,orig_concat_data, cf_concat_data=None):
+		N =len(orig_concat_data['input'])
+		train_len = int(0.8 * N)
+		train_indices = np.random.choice( N,size = train_len,replace=False)
+		dev_indices = np.random.choice( train_indices,size = int(0.1*train_len),replace=False)
+		train_data_dict, dev_data_dict, test_data_dict ={},{},{}
+		for key in ['input','label']:
+		    train_data_dict[key] =[]
+		    test_data_dict[key] = []
+		    dev_data_dict[key] = []
 
-      train_data = all_data["train"]
-      dev_data= all_data["dev"]
-      test_data=all_data["test"]
-      
-      random.shuffle(train_data)
-      random.shuffle(dev_data)
-      random.shuffle(test_data)
+	    for i in range(N):
+		    
+			inp, label  = orig_concat_data['input'][i], orig_concat_data['label'][i]
+		    
+		    if i in train_indices:
+		        if i in dev_indices:
+		            dev_data_dict['input'].append(inp)
+		            dev_data_dict['label'].append(label)
+		        else:
+		            train_data_dict['input'].append(inp)
+		            train_data_dict['label'].append(label)
+		    else:
+				test_data_dict['input'].append(inp)
+				test_data_dict['label'].append(label)
 
-  def train_epoch(self):
-    pass
+		return train_data_dict, dev_data_dict, test_data_dict
 
   def eval_epoch(self):
     pass
+
 
   def train(self,num_epoch):
     pass
@@ -85,12 +99,21 @@ class Experiment(object):
   def load_model(self, model_filepath):
     pass
 
+
   def run(self):
     '''
     Runs the experiment
     '''
     pass
 
+	def train_epoch(self,model,optimizer):
+		pass
+
+	def eval_epoch(self,model,optimizer):
+		pass
+
+	def train(self,num_epoch,model,optimizer):
+		pass
 
 
 def main():

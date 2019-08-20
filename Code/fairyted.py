@@ -9,38 +9,19 @@ from simul_data import *
 from counterfactual_generate import *
 from pymc_model_multivariate import *
 from helper import *
-<<<<<<< HEAD
-#from dummyfordiscussion import *
-
-# a_dim=7
-# mu_a = np.zeros(a_dim)
-# cov_a = np.eye(a_dim)
-
-# num_samples =1000
-# trans_dim = 60
-# u_dim = 30
-# rating_dim = 50
-# N=100
-# mu_u = np.zeros(u_dim)
-# cov_u = np.eye(u_dim)
-# mu_trans = np.zeros(trans_dim)
-# cov_trans = np.eye(trans_dim)
-# mu_rating = np.zeros(rating_dim)
-# cov_rating = np.eye(rating_dim)
-
 
 
 
 class Fairytale(object):
 	"""docstring for Fairytale"""
-	def __init__(self, data=None,u_dim=1):
+	def __init__(self, data=None,u_dim=10):
 		super(Fairytale, self).__init__()
 		self.u_dim = u_dim
 		if data == None:
 			self.simulated = True
-			num_samples =1000
-			trans_dim = 60
-			rating_dim = 50
+			num_samples =100
+			trans_dim = 6
+			rating_dim = 5
 			print('Generating samples from model')
 			self.generator = model1(u_dim,trans_dim,rating_dim)
 			self.data = self.generator.generate(num_samples)			
@@ -54,7 +35,7 @@ class Fairytale(object):
 
 		print('Model Fitting started')
 
-		mf = model_fit(self.data,self.u_dim,'mcmc')
+		mf = model_fit(self.data,self.u_dim,'vi')
 		trace = mf.sample(1000)
 		
 		print('Model Fitting done')
@@ -72,29 +53,50 @@ class Fairytale(object):
 
 		return mf,trace
 
-	def counterfactual_generate(self,data):
+	def counterfactual_generate(self,trace):
 
 		print('Generating counterfactual_sample')
 
-		#causal_model.params_dic.keys()
-		mf,trace = self.fit_params()
-		cfsample = counterfactual_sample(data,trace,self.u_dim)
-		return cfsample
+		data_with_u, cfsample = counterfactual_sample(self.data,trace,self.u_dim)
+		return data_with_u, cfsample
+
+	def create_concat_data(self,data_with_u, cfsample):
+
+
+		assert(data_with_u['transcript'].shape[0]==data_with_u['view'].shape[0])
+		assert(data_with_u['transcript'].shape[0]==data_with_u['rating'].shape[0])
+		assert(data_with_u['transcript'].shape[0]==data_with_u['a'].shape[0])
+		assert(data_with_u['transcript'].shape[0]==data_with_u['u'].shape[0])
+
+
+		assert(cfsample['transcript'].shape[0]==cfsample['view'].shape[0])
+		assert(cfsample['transcript'].shape[0]==cfsample['rating'].shape[0])
+		assert(cfsample['transcript'].shape[0]==cfsample['a'].shape[0])
+		assert(cfsample['transcript'].shape[0]==cfsample['u'].shape[0])
+
+		
+		orig_concat_data, cf_concat_data = dict_to_concat_data(data_with_u), dict_to_concat_data(cfsample)
+		
+		return orig_concat_data, cf_concat_data
 
 	def classify(self,model,config):
 		pass
-=======
-from fairyted import *
-#from dummyfordiscussion import *
-
->>>>>>> ed39994694335a2ed78a95120c30cb6fd6047280
 
 
-data_dict = load_pickle('../Data/converted_data_dict.pkl')
-for key in data_dict:
-	print(len(data_dict[key]),key)	
-	data_dict[key] = np.array(data_dict[key])
-Fairmodel = Fairytale()
-mf,trace=Fairmodel.fit_params()
-data_with_u, cfsample = Fairmodel.counterfactual_generate(trace)
-orig_concat_data, cf_concat_data = Fairmodel.create_concat_data(data_with_u, cfsample)
+
+
+
+# print('Model Fitting started')
+
+# mf = model_fit(data,u_dim,'vi')
+# trace = mf.sample(1000)
+
+
+
+
+    
+
+
+
+
+
