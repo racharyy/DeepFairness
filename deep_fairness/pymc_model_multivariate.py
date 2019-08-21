@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pymc3 as pm 
 import matplotlib.pyplot as plt
 import numpy as np 
@@ -11,12 +5,9 @@ import theano
 import theano.tensor as tt
 from scipy import stats
 import pymc3 as pm 
-from simul_data import *
-from counterfactual_generate import *
 
-
-
-# In[3]:
+from deep_fairness.simul_data import model1
+from deep_fairness.counterfactual_generate import counterfactual_sample
 
 
 def model_fit(data,u_dim,method='mcmc'):

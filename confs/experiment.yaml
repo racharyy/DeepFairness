@@ -1,7 +1,20 @@
 {
+  "input_path": "Data/",
+  "output_path": "Output/",
+
+  "trans_dim": 768,
+  "u_dim": 1,
+  "view_dim": 7,
+  "a_dim": 10,
+
+  "train_causal_model": True,
+  "input_filename": "converted_data_dict.pkl",
+  "causal_model_filename": "trained_trace.pkl",
+
+  "run_experiment": True,
   "model_type": "SimpleMLP",
   "model_params": {
-    "in_size": 100,
+    "in_size": 786,
     "hidden_size": 16,
     "out_size": 14,
     "dropout": 0.1

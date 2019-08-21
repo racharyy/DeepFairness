@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pymc3 as pm 
 import matplotlib.pyplot as plt
 import numpy as np 
@@ -11,9 +5,6 @@ import theano
 import theano.tensor as tt
 from scipy import stats
 import pymc3 as pm 
-
-
-# In[23]:
 
 
 import numpy as np 
@@ -124,19 +115,6 @@ class model1(object):
         samples["rating"] = np.array( samples["rating"])
         return samples
 
-
-# In[24]:
-
-
-# num_samples =1000
-# trans_dim = 60
-# u_dim = 30
-# rating_dim = 50
-# causal_model = model1(u_dim,trans_dim,rating_dim)
-# data = causal_model.generate(num_samples)
-
-
-# In[ ]:
 
 
 

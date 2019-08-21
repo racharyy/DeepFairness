@@ -1,18 +1,9 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pymc3 as pm 
 import matplotlib.pyplot as plt
 import numpy as np 
 import theano
 import theano.tensor as tt
 from scipy import stats
-
-
-# In[3]:
 
 
 def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
