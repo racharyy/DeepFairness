@@ -6,7 +6,7 @@ import theano.tensor as tt
 from scipy import stats
 
 
-def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
+def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10, num_iter_cf=10):
     
     a_dim=data['a'].shape[1]
     trans_dim = data['transcript'].shape[1]
@@ -64,7 +64,7 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
         rating_mean = tt.dot(u,np.transpose(eta_u_rating)) +  tt.dot(data['a'],eta_a_rating) + tt.dot(transcript, eta_transcript_rating) + tt.dot(tt.reshape(view,(-1,1)), tt.reshape(eta_view_rating,(1,-1))) 
         rating = pm.MvNormal('rating', mu= rating_mean, cov = sigma_rating_sq*np.eye(rating_dim), observed = data["rating"] ) 
         
-        u_post_mf = pm.fit(n=100)
+        u_post_mf = pm.fit(n=num_iter_cf)
         new_trace = u_post_mf.sample(num_extra_unobserved)
         u_list=new_trace['u']
         #print(u_list.shape)

@@ -101,8 +101,8 @@ class Experiment(object):
     trace = load_pickle(trace_filename)['trace']
     return trace
 
-  def generate_counterfactual_data(self, trace):
-    data_with_u, cfsample = self.fairmodel.counterfactual_generate(trace)
+  def generate_counterfactual_data(self, trace, num_iter_cf):
+    data_with_u, cfsample = self.fairmodel.counterfactual_generate(trace, num_iter_cf)
     orig_concat_data, cf_concat_data = self.fairmodel.create_concat_data(data_with_u, cfsample)
     cf_filename = os.path.join(self.config['output_path'],self.config['counterfactual_data_filename'])
     pickle.dump({'orig_concat_data':orig_concat_data, 'cf_concat_data':cf_concat_data}, open(cf_filename,'wb'))
@@ -136,11 +136,11 @@ class Experiment(object):
     if self.config['train_causal_model']:
       trace = self.train_counterfactual_causal_model(self.config['fit_params_arguments'])
     else:
-      trace = self.load_trace()
+      trace = self.load_trace()    
 
     # Generate counterfactual data
     if self.config['generate_counterfactual']:
-      orig_concat_data, cf_concat_data = self.generate_counterfactual_data(trace)
+      orig_concat_data, cf_concat_data = self.generate_counterfactual_data(trace, self.config['num_iter_cf'])
     else:
       orig_concat_data, cf_concat_data = self.load_counterfactual_data()
 

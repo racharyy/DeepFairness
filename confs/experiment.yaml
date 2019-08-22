@@ -8,7 +8,7 @@
   "a_dim": 10,
 
   "train_causal_model": False,
-  "input_filename": "converted_data_dict.pkl",
+  "input_filename": "revised_converted_data_dict.pkl",
   "causal_model_filename": "trained_trace.pkl",
   "fit_params_arguments":{
     "nb_sample": 100, 
@@ -18,9 +18,8 @@
   },
 
   "generate_counterfactual": True,
+  "num_iter_cf": 10,
   "counterfactual_data_filename": "cf_data.pkl",
-
-
 
   "run_experiment": True,
   "model_type": "SimpleMLP",

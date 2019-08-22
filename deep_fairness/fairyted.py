@@ -53,14 +53,16 @@ class Fairytale(object):
 
     return mf,trace
 
-  def counterfactual_generate(self,trace):
+  def counterfactual_generate(self,trace, num_iter_cf):
 
     print('Generating counterfactual_sample')
 
-    data_with_u, cfsample = counterfactual_sample(self.data,trace,self.u_dim)
+    data_with_u, cfsample = counterfactual_sample(self.data,trace,self.u_dim, num_iter_cf)
     return data_with_u, cfsample
 
   def create_concat_data(self,data_with_u, cfsample):
+    import pdb; pdb.set_trace()  # breakpoint 67082c69 //
+
     assert(data_with_u['transcript'].shape[0]==data_with_u['view'].shape[0])
     assert(data_with_u['transcript'].shape[0]==data_with_u['rating'].shape[0])
     assert(data_with_u['transcript'].shape[0]==data_with_u['a'].shape[0])
