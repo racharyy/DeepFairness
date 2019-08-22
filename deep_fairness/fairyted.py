@@ -15,12 +15,14 @@ from deep_fairness.helper import load_pickle, dict_to_concat_data
 
 class Fairytale(object):
 
-  def __init__(self,data=None,u_dim=10, num_samples =100,
-               trans_dim = 6,rating_dim = 5):
+  def __init__(self, data=None,u_dim=10):
     super(Fairytale, self).__init__()
     self.u_dim = u_dim
     if data == None:
       self.simulated = True
+      num_samples =100
+      trans_dim = 6
+      rating_dim = 5
       print('Generating samples from model')
       self.generator = model1(u_dim,trans_dim,rating_dim)
       self.data = self.generator.generate(num_samples)      
@@ -30,11 +32,11 @@ class Fairytale(object):
       self.simulated = False
 
 
-  def fit_params(self,nb_sample=100,check_differences=True):
+  def fit_params(self, nb_sample=100, check_differences=True, num_iter=10):
 
     print('Model Fitting started')
 
-    mf = model_fit(self.data,self.u_dim,'vi')
+    mf = model_fit(self.data,self.u_dim,'vi', num_iter)
     trace = mf.sample(nb_sample)
     
     print('Model Fitting done')

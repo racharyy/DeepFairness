@@ -99,7 +99,7 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10):
         #print(x[0])
         for i in range(3):
             for j in range(3,7):
-                a= np.zeros(7)
+                a= np.zeros(7)                
                 if i!=x[0][0] or j!=x[0][1]:
                     a[i]=1
                     a[j]=1

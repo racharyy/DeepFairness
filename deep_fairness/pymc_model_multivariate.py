@@ -10,7 +10,7 @@ from deep_fairness.simul_data import model1
 from deep_fairness.counterfactual_generate import counterfactual_sample
 
 
-def model_fit(data,u_dim,method='mcmc'):
+def model_fit(data,u_dim,method='mcmc', num_iter = 10):
 
     #u_dim = 30
     a_dim=data['a'].shape[1]
@@ -25,12 +25,6 @@ def model_fit(data,u_dim,method='mcmc'):
     cov_trans = np.eye(trans_dim)
     mu_rating = np.zeros(rating_dim)
     cov_rating = np.eye(rating_dim)
-
-    #num_samples =1000
-    
-    N=100
-    
-
 
     with pm.Model() as model:
 
@@ -76,9 +70,9 @@ def model_fit(data,u_dim,method='mcmc'):
         if method == 'mcmc':   
             step = pm.NUTS()
             #init='adapt_diag'
-            trace=pm.sample(100)#,step =step)#,target_accept=0.8)
+            trace=pm.sample(num_iter)#,step =step)#,target_accept=0.8)
         elif method == 'vi':
-            trace=pm.fit(n=300)
+            trace=pm.fit(n=num_iter)
         else:
             print('Not Implemented any other method')
             return

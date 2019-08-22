@@ -7,16 +7,20 @@
   "view_dim": 7,
   "a_dim": 10,
 
-  "train_causal_model": True,
+  "train_causal_model": False,
   "input_filename": "converted_data_dict.pkl",
   "causal_model_filename": "trained_trace.pkl",
-  "fairytale_params":{
-    "data": None,
-    "u_dim": 10, 
-    "num_samples": 100,
-    "trans_dim": 6, 
-    "rating_dim": 5
+  "fit_params_arguments":{
+    "nb_sample": 100, 
+    "check_differences": False, 
+    "num_iter": 10, 
+    "num_iter": 10
   },
+
+  "generate_counterfactual": True,
+  "counterfactual_data_filename": "cf_data.pkl",
+
+
 
   "run_experiment": True,
   "model_type": "SimpleMLP",
