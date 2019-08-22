@@ -10,6 +10,13 @@
   "train_causal_model": True,
   "input_filename": "converted_data_dict.pkl",
   "causal_model_filename": "trained_trace.pkl",
+  "fairytale_params":{
+    "data": None,
+    "u_dim": 10, 
+    "num_samples": 100,
+    "trans_dim": 6, 
+    "rating_dim": 5
+  },
 
   "run_experiment": True,
   "model_type": "SimpleMLP",

@@ -43,9 +43,6 @@ class Experiment(object):
     assert(self.config['model_params']['in_size'] == self.config['trans_dim'] + 
       self.config['u_dim'] + self.config['view_dim'] + self.config['a_dim'])
 
-    # Initiate fairmodel
-    self.fairmodel = Fairytale()
-
     # Prepare the neural network and others
     self.model = getattr(models, self.config['model_type'])(**self.config['model_params'])
     self.loss_fn = getattr(nn, self.config['loss_function_name'])
@@ -83,26 +80,31 @@ class Experiment(object):
     return train_data_dict, dev_data_dict, test_data_dict
 
 
-  def train_counterfactual_causal_model(self):
+  def train_counterfactual_causal_model(self, fairytale_params):
     # Read data
-    data_dict = os.path.join(self.config['input_path'], self.config['input_filename'])
+    fairytale_params = {akey:aval for }
+    data_dict_path = os.path.join(self.config['input_path'], self.config['input_filename'])
+    data_dict = load_pickle(data_dict_path)
     for key in data_dict:
       data_dict[key] = np.array(data_dict[key])
 
     # Train fairmodel
-    mf,trace=self.fairmodel.fit_params()
+    self.fairmodel = Fairytale(**fairytale_params)
+    mf, trace = self.fairmodel.fit_params()
 
     # Save the trace for future use
     trace_filename = os.path.join(self.config['output_path'], self.config['causal_model_filename'])
     pickle.dump({'trace':trace}, open(trace_filename, 'wb'))
     return trace
 
-  def generate_counterfactual_data(self):
+  def load_trace(self):
     trace_filename = os.path.join(self.config['output_path'], self.config['causal_model_filename'])
     if not os.path.exists(trace_filename):
       raise Exception('Trace file not found. Run Experiment.train_counterfactual_causal_model first')
     trace = load_pickle(trace_filename)['trace']
-    
+    return trace
+
+  def generate_counterfactual_data(self, trace):
     data_with_u, cfsample = self.fairmodel.counterfactual_generate(trace)
     orig_concat_data, cf_concat_data = self.fairmodel.create_concat_data(data_with_u, cfsample)    
     return orig_concat_data, cf_concat_data
@@ -110,7 +112,6 @@ class Experiment(object):
 
   def eval_epoch(self):
     pass
-
 
   def train(self,num_epoch):
     pass
@@ -126,7 +127,13 @@ class Experiment(object):
     '''
     Runs the experiment
     '''
-    pass
+    if self.config['train_causal_model']:
+      trace = self.train_counterfactual_causal_model(self.config['fairytale_params'])
+    else:
+      trace = self.load_trace()
+    orig_concat_data, cf_concat_data = self.generate_counterfactual_data(trace)
+    train, dev, test = self.setup_data_loader(orig_concat_data, cf_concat_data)
+      
 
   def train_epoch(self,model,optimizer):
     pass
