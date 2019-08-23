@@ -6,6 +6,8 @@ import os
 import random
 import pickle
 import sys
+import time
+import copy
 import numpy as np
 
 import deep_fairness.classification_model as models
@@ -141,7 +143,7 @@ class Experiment(object):
     since = time.time()
 
     best_model_wts = copy.deepcopy(self.model.state_dict())
-    best_acc = 0.0
+    best_loss = float('inf')
 
     for epoch in range(max_epochs):
       print('Epoch {}/{}'.format(epoch, max_epochs - 1))
@@ -178,8 +180,11 @@ class Experiment(object):
             # backward + optimize only if in training phase
             if phase == 'train':
                 loss.backward()
-                self.optimizer.step()
-                self.scheduler.step()
+                self.optimizer.step()                
+                # try:
+                #   self.scheduler.step()
+                # except:
+                #   self.scheduler.step(metrics=loss)
 
           # statistics
           running_loss += loss.item() * inputs.size(0)
@@ -189,19 +194,17 @@ class Experiment(object):
         print('{} Loss: {:.4f} '.format(phase, epoch_loss))
 
         # deep copy the model
-        if phase == 'val' and epoch_acc > best_acc:
-          best_acc = epoch_acc
+        if phase == 'val' and epoch_loss < best_loss:
+          best_loss = epoch_loss
           best_model_wts = copy.deepcopy(self.model.state_dict())
 
       print()
 
     time_elapsed = time.time() - since
     print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
-    print('Best val Acc: {:4f}'.format(best_acc))
 
     # load best model weights
     self.model.load_state_dict(best_model_wts)
-
 
   def save_model(self, model_filepath):
     pass
@@ -237,7 +240,7 @@ class Experiment(object):
     train_idx, dev_idx, test_idx = sample_indices(orig_concat_data['input'].shape[0])
 
     if self.config['train_neural_network']:
-      self.train(orig_concat_data, cf_concat_data, train_idx, dev_idx, **self.config['trainer_params'])
+      self.train_model(orig_concat_data, cf_concat_data, train_idx, dev_idx, **self.config['trainer_params'])
 
     import pdb; pdb.set_trace()  # breakpoint 6cdf7c39 //
     
