@@ -37,3 +37,19 @@ def dict_to_concat_data(data_dict):
     all_data_dict['label'] = np.array(all_data_dict['label'])
 
     return all_data_dict
+
+def sample_indices(N):
+    train_len = int(0.8 * N)
+    train_indices = np.random.choice( N,size = train_len,replace=False)
+    dev_indices = np.random.choice( train_indices,size = int(0.1*train_len),replace=False)
+    test_indices = set(range(N)).difference(train_indices)
+    return train_indices, dev_indices, test_indices
+
+def cvt(i, span=110):
+  return i*span, (i+1)*span
+
+def make_minibatch(list_index, minibatch_size=10):
+    while True:
+        np.random.shuffle(list_index)
+        yield list_index[:minibatch_size]
+

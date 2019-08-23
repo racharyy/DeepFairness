@@ -34,6 +34,6 @@ class SimpleMLP(nn.Module):
 
 		h1 = self.w1(x)
 		a = self.relu(h1)
-		# a = self.dropout(a)
+		a = self.dropout(a)
 		h2 = self.w2(a)
 		return h2

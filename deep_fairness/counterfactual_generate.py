@@ -110,7 +110,6 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10, num_iter_cf=
         other_a = np.repeat([other_a],num_extra_unobserved,axis=0).reshape(-1,7)
         a_temp.extend(other_a)
 
-
     new_data['transcript'] = np.repeat(data['transcript'],num_repeat,axis=0)
     new_data['view'] = np.repeat(data['view'],num_repeat,axis=0)
     new_data['rating'] = np.repeat(data['rating'],num_repeat,axis=0)

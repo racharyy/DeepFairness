@@ -61,8 +61,6 @@ class Fairytale(object):
     return data_with_u, cfsample
 
   def create_concat_data(self,data_with_u, cfsample):
-    import pdb; pdb.set_trace()  # breakpoint 67082c69 //
-
     assert(data_with_u['transcript'].shape[0]==data_with_u['view'].shape[0])
     assert(data_with_u['transcript'].shape[0]==data_with_u['rating'].shape[0])
     assert(data_with_u['transcript'].shape[0]==data_with_u['a'].shape[0])
