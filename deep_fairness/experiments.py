@@ -70,6 +70,9 @@ class Experiment(object):
     self.loss_fn = getattr(nn, self.config['loss_function_name'])()
     self.optimizer = getattr(optim, self.config['optimizer'])(self.model.parameters(),**self.config['optimizer_params'])
     self.scheduler = getattr(optim.lr_scheduler, self.config['scheduler'])(self.optimizer, **self.config['scheduler_params'])
+    self.relu = nn.ReLU()
+    self.cf_loss = counterfactual_loss()
+
 
   def set_random_seed(self):      
     seed = self.config['seed']
@@ -138,6 +141,12 @@ class Experiment(object):
           inputs = orig_concat_data['input'][a_batch,:]
           labels = orig_concat_data['label'][a_batch,:]
 
+          if use_cf:
+            cf_slice = cvt(a_batch)
+            cf_inp = cf_concat_data['input'][cf_slice,:]
+
+
+
           # zero the parameter gradients
           self.optimizer.zero_grad()
 
@@ -146,6 +155,9 @@ class Experiment(object):
           with torch.set_grad_enabled(phase == 'train'):
             outputs = self.model(inputs)
             loss = self.loss_fn(outputs, labels)
+            if use_cf:
+              cf_outputs = self.model(cf_inp)
+              loss = loss+self.relu(cf_loss(cf_outputs,labels))
 
             # backward + optimize only if in training phase
             if phase == 'train':
