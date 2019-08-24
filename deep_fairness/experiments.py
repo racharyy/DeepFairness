@@ -38,6 +38,7 @@ import torch.optim as optim
 
 
 class Experiment(object):
+
   def __init__(self, config):
     super(Experiment, self).__init__()
     self.config = config
@@ -51,7 +52,6 @@ class Experiment(object):
     else:
       self.device = torch.device('gpu:{0}'.format(self.config['gpu_num']))
 
-
     # Load fairmodel
     data_dict_path = os.path.join(self.config['input_path'], self.config['input_filename'])
     data_dict = load_pickle(data_dict_path)
@@ -64,6 +64,8 @@ class Experiment(object):
       self.fairmodel = Fairytale(data=data_dict)
 
     # Prepare the neural network and others
+    self.total_epoch = 0
+    self.best_loss = float('inf')
     self.model = getattr(models, self.config['model_type'])(**self.config['model_params']).to(device=self.device)
     self.loss_fn = getattr(nn, self.config['loss_function_name'])()
     self.optimizer = getattr(optim, self.config['optimizer'])(self.model.parameters(),**self.config['optimizer_params'])
@@ -103,47 +105,15 @@ class Experiment(object):
     cf_concat_data = data['cf_concat_data']
     return orig_concat_data, cf_concat_data
 
-  def eval_epoch(self):
-    pass
-
-  def train(self, orig_concat_data, cf_concat_data, train_idx, dev_idx, 
-    max_epochs=10, max_iter=10, use_cf=True, minibatch_size=10):
-
-    for i in range(max_epochs):
-      self.model.train()
-      for iter, a_batch in enumerate(make_minibatch(train_idx, minibatch_size)):
-        if iter > max_iter:
-          break
-        inputs = orig_concat_data['input'][a_batch,:]
-        labels = orig_concat_data['label'][a_batch,:]
-
-        self.model.zero_grad()
-        model_out = self.model(input_data)
-
-        loss = self.loss_fn(model_out, label_data)
-        import pdb; pdb.set_trace()  # breakpoint f631aaf3 //
-
-        loss.backward()
-        self.optimizer.step()
-
-        print('train_loss:{0}'.format(loss))
-
-
-
-        # if use_cf:
-        #   input_cf_data = None
-        #   for st, en in (cvt(idx) for idx in a_batch):
-        #     if input_cf_data is None:
-        #       input_cf_data = 
-        #     input_cf_data = cf_concat_data['input'][a_batch,:]
-
+  def eval_model(self, orig_concat_data, cf_concat_data, test_idx):
+    for iter, a_batch in enumerate(test_idx):
+      pass
 
   def train_model(self, orig_concat_data, cf_concat_data, train_idx, dev_idx, 
     max_epochs=10, max_iter=10, use_cf=True, minibatch_size=10):
     since = time.time()
 
     best_model_wts = copy.deepcopy(self.model.state_dict())
-    best_loss = float('inf')
 
     for epoch in range(max_epochs):
       print('Epoch {}/{}'.format(epoch, max_epochs - 1))
@@ -187,30 +157,46 @@ class Experiment(object):
                 #   self.scheduler.step(metrics=loss)
 
           # statistics
-          running_loss += loss.item() * inputs.size(0)
+          running_loss += loss.item()
 
         epoch_loss = running_loss / (max_iter * minibatch_size)
 
         print('{} Loss: {:.4f} '.format(phase, epoch_loss))
 
         # deep copy the model
-        if phase == 'val' and epoch_loss < best_loss:
-          best_loss = epoch_loss
+        if phase == 'val' and epoch_loss < self.best_loss:
+          self.best_loss = epoch_loss
           best_model_wts = copy.deepcopy(self.model.state_dict())
 
       print()
 
     time_elapsed = time.time() - since
-    print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))
+
+    self.total_epoch += epoch 
+    print('Training complete in {:.0f}m {:.0f}s (total epoch = {})'.format(
+      time_elapsed // 60, time_elapsed % 60, self.total_epoch))
 
     # load best model weights
     self.model.load_state_dict(best_model_wts)
 
   def save_model(self, model_filepath):
-    pass
+    checkpoint = {
+      'total_epoch':self.total_epoch,
+      'model_state_dict':self.model.state_dict(),
+      'optimizer_state_dict':self.optimizer.state_dict(),
+      'scheduler_state_dict':self.scheduler.state_dict(),
+      'best_loss':self.best_loss
+    }
+    torch.save(checkpoint, model_filepath)
+    
 
   def load_model(self, model_filepath):
-    pass
+    checkpoint = torch.load(model_filepath)
+    self.total_epoch = checkpoint['total_epoch']
+    self.best_loss = checkpoint['best_loss']
+    self.model.load_state_dict(checkpoint['model_state_dict'])
+    self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
 
 
   def run(self):
@@ -219,12 +205,14 @@ class Experiment(object):
     '''
 
     # Train causal model
+    # ==================
     if self.config['train_causal_model']:
       trace = self.train_counterfactual_causal_model(self.config['fit_params_arguments'])
     else:
       trace = self.load_trace()    
 
     # Generate counterfactual data
+    # ============================
     if self.config['generate_counterfactual']:
       orig_concat_data, cf_concat_data = self.generate_counterfactual_data(trace, 
         self.config['num_iter_cf'])
@@ -232,15 +220,30 @@ class Experiment(object):
       orig_concat_data, cf_concat_data = self.load_counterfactual_data()
 
     # Send to appropriate device
+    # ==========================
     for a_key in orig_concat_data:
       orig_concat_data[a_key] = torch.from_numpy(orig_concat_data[a_key].astype(np.float32)).to(device=self.device)
       cf_concat_data[a_key] = torch.from_numpy(cf_concat_data[a_key].astype(np.float32)).to(device=self.device)
 
-
+    # Divide into train/dev/test
+    # ==========================
     train_idx, dev_idx, test_idx = sample_indices(orig_concat_data['input'].shape[0])
 
+    # Neural network training part
+    # ============================
     if self.config['train_neural_network']:
+      nn_filename = os.path.join(self.config['output_path'], self.config['neural_network_model_filename'])
+      if self.config['load_nn_from_file']:
+        self.load_model(nn_filename)
       self.train_model(orig_concat_data, cf_concat_data, train_idx, dev_idx, **self.config['trainer_params'])
+      self.save_model(nn_filename)
 
-    import pdb; pdb.set_trace()  # breakpoint 6cdf7c39 //
+    # Eval Neural Network
+    # ===================
+    if self.config['eval_neural_network']:
+      nn_filename = os.path.join(self.config['output_path'], self.config['load_nn_filename'])
+      self.load_model(nn_filename)
+      self.eval_model(orig_concat_data, cf_concat_data, test_idx)
+
+
     

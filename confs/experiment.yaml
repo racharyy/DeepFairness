@@ -8,7 +8,6 @@
   "a_dim": 10,
 
   "use_simulated_data": True,
-  "gpu_num": -1,
 
 
 
@@ -31,6 +30,9 @@
 
 
   "train_neural_network": True,
+  "load_nn_from_file": False,
+  "neural_network_model_filename": "trained_nn.model"
+  "gpu_num": -1,
   "model_type": "SimpleMLP",
   "model_params": {
     "in_size": 24,
@@ -66,4 +68,10 @@
     "use_cf": True,
     "minibatch_size": 10
   }
+
+
+  "eval_neural_network": True,
+  "load_nn_filename": "trained_nn.model",
+
+
 }
