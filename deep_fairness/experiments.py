@@ -111,18 +111,15 @@ class Experiment(object):
   def test_model(self, orig_concat_data, test_idx):
     self.model.eval()
 
-    for idx in test_idx:
-      inputs = orig_concat_data['input'][idx,:]
-      labels = orig_concat_data['label'][idx,:]
+    
+    inputs = orig_concat_data['input'][test_idx,:]
+    labels = orig_concat_data['label'][test_idx,:]
 
-    total_acc = 0
     with torch.set_grad_enabled(False):
       outputs = self.model(inputs)
-      acc = calc_acc(outputs, labels)
-      total_acc += acc
+      total_acc = calc_acc(outputs, labels)
 
-    average_test_acc = total_acc / len(test_idx)
-    print('Test Loss: {:.4f} '.format(average_test_acc))
+    average_test_acc = np.mean(total_acc.numpy(),axis=0)
 
     return average_test_acc
 

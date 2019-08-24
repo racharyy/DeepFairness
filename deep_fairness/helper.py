@@ -61,8 +61,8 @@ def counterfactual_loss(cf_outputs,labels,epsilon=0.1,span=11):
     return (1.0/n)*(torch.norm(cf_outputs - labels)-epsilon)
 
 
-def calc_acc(input, target):
-    pass
+def calc_acc(model_output, target):
+    return torch.sum(torch.equal((nn.sigmoid(model_output) >= 0.5), target))
 
 
 
