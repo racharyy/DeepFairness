@@ -45,11 +45,31 @@ def sample_indices(N):
     test_indices = set(range(N)).difference(train_indices)
     return train_indices, dev_indices, test_indices
 
-def cvt(i, span=110):
-  return i*span, (i+1)*span
+def cvt(ind_list, span=110):
+    return np.array([range(i*span,(i+1)*span) for i in ind_list]).flatten()
 
 def make_minibatch(list_index, minibatch_size=10):
     while True:
         np.random.shuffle(list_index)
         yield list_index[:minibatch_size]
+
+
+def counterfactual_loss(cf_outputs,labels,epsilon=0.1,span=110):
+    n = len(cf_outputs)
+    return (1.0/n)*(torch.norm(cf_outputs - labels)-epsilon)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
