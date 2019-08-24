@@ -12,7 +12,7 @@ import numpy as np
 
 import deep_fairness.classification_model as models
 from deep_fairness.fairyted import Fairytale
-from deep_fairness.helper import load_pickle, sample_indices, cvt, make_minibatch, counterfactual_loss
+from deep_fairness.helper import load_pickle, sample_indices, cvt, make_minibatch, counterfactual_loss, calc_acc
 
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -115,10 +115,17 @@ class Experiment(object):
       inputs = orig_concat_data['input'][idx,:]
       labels = orig_concat_data['label'][idx,:]
 
+    total_acc = 0
     with torch.set_grad_enabled(False):
       outputs = self.model(inputs)
-      loss = self.loss_fn(outputs, labels)
-      
+      acc = calc_acc(outputs, labels)
+      total_acc += acc
+
+    average_test_acc = total_acc / len(test_idx)
+    print('Test Loss: {:.4f} '.format(average_test_acc))
+
+    return average_test_acc
+
 
   def train_model(self, orig_concat_data, cf_concat_data, train_idx, dev_idx, 
     max_epochs=10, max_iter=10, use_cf=True, minibatch_size=10):
