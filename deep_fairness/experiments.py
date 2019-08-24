@@ -12,7 +12,7 @@ import numpy as np
 
 import deep_fairness.classification_model as models
 from deep_fairness.fairyted import Fairytale
-from deep_fairness.helper import load_pickle, sample_indices, cvt, make_minibatch
+from deep_fairness.helper import load_pickle, sample_indices, cvt, make_minibatch, counterfactual_loss
 
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -71,7 +71,7 @@ class Experiment(object):
     self.optimizer = getattr(optim, self.config['optimizer'])(self.model.parameters(),**self.config['optimizer_params'])
     self.scheduler = getattr(optim.lr_scheduler, self.config['scheduler'])(self.optimizer, **self.config['scheduler_params'])
     self.relu = nn.ReLU()
-    self.cf_loss = counterfactual_loss()
+    self.cf_loss = counterfactual_loss
 
 
   def set_random_seed(self):      
@@ -108,9 +108,17 @@ class Experiment(object):
     cf_concat_data = data['cf_concat_data']
     return orig_concat_data, cf_concat_data
 
-  def eval_model(self, orig_concat_data, cf_concat_data, test_idx):
-    for iter, a_batch in enumerate(test_idx):
-      pass
+  def test_model(self, orig_concat_data, test_idx):
+    self.model.eval()
+
+    for idx in test_idx:
+      inputs = orig_concat_data['input'][idx,:]
+      labels = orig_concat_data['label'][idx,:]
+
+    with torch.set_grad_enabled(False):
+      outputs = self.model(inputs)
+      loss = self.loss_fn(outputs, labels)
+      
 
   def train_model(self, orig_concat_data, cf_concat_data, train_idx, dev_idx, 
     max_epochs=10, max_iter=10, use_cf=True, minibatch_size=10):
@@ -126,14 +134,15 @@ class Experiment(object):
       for phase in ['train', 'val']:
         if phase == 'train':
           self.model.train()  # Set model to training mode
+          indices = train_idx
         else:
           self.model.eval()   # Set model to evaluate mode
+          indices = dev_idx
 
         running_loss = 0.0
-        running_corrects = 0
 
         # Iterate over data.
-        for iter, a_batch in enumerate(make_minibatch(train_idx, minibatch_size)):
+        for iter, a_batch in enumerate(make_minibatch(indices, minibatch_size)):
           
           if iter > max_iter:
             break
@@ -145,8 +154,6 @@ class Experiment(object):
             cf_slice = cvt(a_batch)
             cf_inp = cf_concat_data['input'][cf_slice,:]
 
-
-
           # zero the parameter gradients
           self.optimizer.zero_grad()
 
@@ -155,9 +162,10 @@ class Experiment(object):
           with torch.set_grad_enabled(phase == 'train'):
             outputs = self.model(inputs)
             loss = self.loss_fn(outputs, labels)
+
             if use_cf:
               cf_outputs = self.model(cf_inp)
-              loss = loss+self.relu(cf_loss(cf_outputs,labels))
+              loss = loss+self.relu(self.cf_loss(cf_outputs,labels))
 
             # backward + optimize only if in training phase
             if phase == 'train':
@@ -252,10 +260,10 @@ class Experiment(object):
 
     # Eval Neural Network
     # ===================
-    if self.config['eval_neural_network']:
+    if self.config['test_neural_network']:
       nn_filename = os.path.join(self.config['output_path'], self.config['load_nn_filename'])
       self.load_model(nn_filename)
-      self.eval_model(orig_concat_data, cf_concat_data, test_idx)
+      self.test_model(orig_concat_data, cf_concat_data, test_idx)
 
 
     

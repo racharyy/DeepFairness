@@ -71,7 +71,6 @@ class Fairytale(object):
     assert(cfsample['transcript'].shape[0]==cfsample['rating'].shape[0])
     assert(cfsample['transcript'].shape[0]==cfsample['a'].shape[0])
     assert(cfsample['transcript'].shape[0]==cfsample['u'].shape[0])
-
     
     orig_concat_data, cf_concat_data = dict_to_concat_data(data_with_u), dict_to_concat_data(cfsample)
     
