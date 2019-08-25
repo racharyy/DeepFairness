@@ -42,7 +42,7 @@ def sample_indices(N):
     train_len = int(0.8 * N)
     train_indices = np.random.choice( N,size = train_len,replace=False)
     dev_indices = np.random.choice( train_indices,size = int(0.1*train_len),replace=False)
-    test_indices = set(range(N)).difference(train_indices)
+    test_indices = list(set(range(N)).difference(train_indices))
     return train_indices, dev_indices, test_indices
 
 def cvt(ind_list, span=11):
@@ -62,7 +62,10 @@ def counterfactual_loss(cf_outputs,labels,epsilon=0.1,span=11):
 
 
 def calc_acc(model_output, target):
-    return torch.sum(torch.equal((nn.sigmoid(model_output) >= 0.5), target))
+    m= nn.Sigmoid()
+    x= (m(model_output)>= 0.5).float()
+    y = torch.eq(x, target).float()
+    return y
 
 
 

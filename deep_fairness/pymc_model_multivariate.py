@@ -62,9 +62,9 @@ def model_fit(data,u_dim,method='mcmc', num_iter = 10):
         view_mean = tt.maximum(1,view0 + tt.dot(eta_u_view , u)+   tt.dot(data['a'],eta_a_view)+tt.dot(transcript, eta_transcript_view)) 
         view = pm.Poisson('view',mu =view_mean, observed = data['view'] )
 
-        rating_mean = tt.dot(eta_u_rating , u) +  tt.dot(data['a'],eta_a_rating) + tt.dot(transcript, eta_transcript_rating) + tt.dot(tt.reshape(view,(-1,1)), tt.reshape(eta_view_rating,(1,-1))) 
-        rating = pm.MvNormal('rating', mu= rating_mean, cov = sigma_rating_sq*np.eye(rating_dim), observed = data["rating"] ) 
-        
+        rating_mean =tt.nnet.nnet.sigmoid(tt.dot(eta_u_rating , u) +  tt.dot(data['a'],eta_a_rating) + tt.dot(transcript, eta_transcript_rating) + tt.dot(tt.reshape(view,(-1,1)), tt.reshape(eta_view_rating,(1,-1)))) 
+        #rating = pm.MvNormal('rating', mu= rating_mean, cov = sigma_rating_sq*np.eye(rating_dim), observed = data["rating"] ) 
+        rating = pm.Bernoulli('rating',p=rating_mean, observed = data["rating"] )
 
 
         if method == 'mcmc':   

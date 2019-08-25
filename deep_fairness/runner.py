@@ -9,7 +9,8 @@ import theano
 import theano.tensor as tt
 from scipy import stats
 import pymc3 as pm 
-
+import sys
+sys.path.insert(0,'../')
 from deep_fairness.simul_data import model1
 from deep_fairness.fairyted import Fairytale
 from deep_fairness.counterfactual_generate import counterfactual_sample

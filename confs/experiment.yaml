@@ -11,7 +11,7 @@
 
 
 
-  "train_causal_model": False,
+  "train_causal_model": True,
   "input_filename": "revised_converted_data_dict.pkl",
   "causal_model_filename": "trained_trace.pkl",
   "fit_params_arguments":{
@@ -23,7 +23,7 @@
 
 
 
-  "generate_counterfactual": False,
+  "generate_counterfactual": True,
   "num_iter_cf": 10,
   "counterfactual_data_filename": "cf_data.pkl",
 
@@ -63,7 +63,7 @@
   #  "momentum": 0.9
   #},
   "trainer_params":{
-    "max_epochs": 10,
+    "max_epochs": 100,
     "max_iter": 10,
     "use_cf": True,
     "minibatch_size": 10

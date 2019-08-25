@@ -5,7 +5,7 @@ import theano
 import theano.tensor as tt
 from scipy import stats
 import pymc3 as pm 
-
+from scipy.special import expit
 
 import numpy as np 
 from scipy.stats import invgamma
@@ -100,9 +100,9 @@ class model1(object):
             #print(view_mean)
             view = np.random.poisson(view_mean)
             
-            rating_mean = np.dot(eta_u_rating, u) + np.dot(a,eta_a_rating) + np.dot(transcript,eta_transcript_rating)+ view * eta_view_rating 
-            rating = np.random.normal(rating_mean, sigma_rating)
-
+            rating_mean = expit(np.dot(eta_u_rating, u) + np.dot(a,eta_a_rating) + np.dot(transcript,eta_transcript_rating)+ view * eta_view_rating) 
+            #rating = np.random.normal(rating_mean, sigma_rating)
+            rating = np.random.binomial(1,rating_mean)
 
             #samples["u"].append(u)
             samples["a"].append(a)
@@ -113,6 +113,7 @@ class model1(object):
         samples["transcript"] = np.array(samples["transcript"])
         samples["view"] = np.array(samples["view"])
         samples["rating"] = np.array( samples["rating"])
+        #print(samples["rating"])
         return samples
 
 

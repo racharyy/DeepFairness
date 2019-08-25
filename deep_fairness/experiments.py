@@ -120,7 +120,7 @@ class Experiment(object):
       total_acc = calc_acc(outputs, labels)
 
     average_test_acc = np.mean(total_acc.numpy(),axis=0)
-
+    print("Test Accuracy is :",average_test_acc)
     return average_test_acc
 
 
@@ -262,12 +262,12 @@ class Experiment(object):
       self.train_model(orig_concat_data, cf_concat_data, train_idx, dev_idx, **self.config['trainer_params'])
       self.save_model(nn_filename)
 
-    # Eval Neural Network
+    # Test Neural Network
     # ===================
     if self.config['test_neural_network']:
       nn_filename = os.path.join(self.config['output_path'], self.config['load_nn_filename'])
       self.load_model(nn_filename)
-      self.test_model(orig_concat_data, cf_concat_data, test_idx)
+      self.test_model(orig_concat_data, test_idx)
 
 
     
