@@ -65,7 +65,7 @@ def calc_acc(model_output, target):
     m= nn.Sigmoid()
     x= (m(model_output)>= 0.5).float()
     # print(model_output.shape)
-    # print(x)
+    print(x)
     y = torch.eq(x, target).float()
     return y
 

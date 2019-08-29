@@ -12,7 +12,7 @@
 
 
   "train_causal_model": True,
-  "input_filename": "doc2vec_data.pkl",
+  "input_filename": "doc2vec_50.pkl",
   "causal_model_filename": "trained_trace.pkl",
   "fit_params_arguments":{
     "nb_sample": 1000, 
@@ -22,7 +22,7 @@
 
 
 
-  "generate_counterfactual": True,
+  "generate_counterfactual":True,
   "num_iter_cf": 10,
   "counterfactual_data_filename": "cf_data.pkl",
 
