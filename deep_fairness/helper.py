@@ -28,8 +28,8 @@ def dict_to_concat_data(data_dict):
     all_data_dict = {'input':[],'label':[]}
 
     for i in range(len(data_dict['a'])):
-        inp = data_dict['transcript'][i][:20]#np.concatenate((data_dict['transcript'][i],data_dict['a'][i],[data_dict['view'][i]],data_dict['u'][i]))
-        label = data_dict['rating'][i][:2]
+        inp = data_dict['transcript'][i]#np.concatenate((data_dict['transcript'][i],data_dict['a'][i],[data_dict['view'][i]],data_dict['u'][i]))
+        label = data_dict['rating'][i]
         all_data_dict['input'].append(inp)
         all_data_dict['label'].append(label)
 

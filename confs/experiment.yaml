@@ -12,13 +12,12 @@
 
 
   "train_causal_model": True,
-  "input_filename": "scaled_label_data.pkl",
+  "input_filename": "doc2vec_data.pkl",
   "causal_model_filename": "trained_trace.pkl",
   "fit_params_arguments":{
-    "nb_sample": 100, 
+    "nb_sample": 1000, 
     "check_differences": False, 
-    "num_iter": 10, 
-    "num_iter": 10
+    "num_iter": 100
   },
 
 
@@ -35,9 +34,9 @@
   "gpu_num": -1,
   "model_type": "SimpleMLP",
   "model_params": {
-    "in_size": 20,
-    "hidden_size": 10,
-    "out_size": 2,
+    "in_size": 32,
+    "hidden_size": 100,
+    "out_size": 14,
     "dropout": 0.1
   },
   "loss_function_name": "BCEWithLogitsLoss",
@@ -63,8 +62,8 @@
   #  "momentum": 0.9
   #},
   "trainer_params":{
-    "max_epochs": 100,
-    "max_iter": 10,
+    "max_epochs": 400,
+    "max_iter": 15,
     "use_cf": False,
     "minibatch_size": 10
   },
