@@ -2,17 +2,17 @@
   "input_path": "Data/",
   "output_path": "Output/",
 
-  "trans_dim": 768,
-  "u_dim": 1,
-  "view_dim": 7,
-  "a_dim": 10,
+  # "trans_dim": 768,
+  # "u_dim": 1,
+  # "view_dim": 7,
+  # "a_dim": 10,
 
-  "use_simulated_data": True,
+  "use_simulated_data": False,
 
 
 
   "train_causal_model": True,
-  "input_filename": "revised_converted_data_dict.pkl",
+  "input_filename": "scaled_label_data.pkl",
   "causal_model_filename": "trained_trace.pkl",
   "fit_params_arguments":{
     "nb_sample": 100, 
@@ -35,9 +35,9 @@
   "gpu_num": -1,
   "model_type": "SimpleMLP",
   "model_params": {
-    "in_size": 24,
-    "hidden_size": 16,
-    "out_size": 5,
+    "in_size": 20,
+    "hidden_size": 10,
+    "out_size": 2,
     "dropout": 0.1
   },
   "loss_function_name": "BCEWithLogitsLoss",
@@ -65,7 +65,7 @@
   "trainer_params":{
     "max_epochs": 100,
     "max_iter": 10,
-    "use_cf": True,
+    "use_cf": False,
     "minibatch_size": 10
   },
 

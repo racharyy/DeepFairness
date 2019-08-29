@@ -36,4 +36,5 @@ class SimpleMLP(nn.Module):
 		a = self.relu(h1)
 		a = self.dropout(a)
 		h2 = self.w2(a)
+		#print(h2.shape)
 		return h2

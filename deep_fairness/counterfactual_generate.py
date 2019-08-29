@@ -6,7 +6,7 @@ import theano.tensor as tt
 from scipy import stats
 
 
-def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10, num_iter_cf=10):
+def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=1, num_iter_cf=10):
     
     a_dim=data['a'].shape[1]
     trans_dim = data['transcript'].shape[1]
@@ -111,7 +111,7 @@ def counterfactual_sample(data,trace,u_dim,num_extra_unobserved=10, num_iter_cf=
         a_temp.extend(other_a)
 
     new_data['transcript'] = np.repeat(data['transcript'],num_repeat,axis=0)
-    new_data['view'] = np.repeat(data['view'],num_repeat,axis=0)
+    new_data['view'] = np.zeros(num_repeat*len(data['view']))#np.repeat(data['view'],num_repeat,axis=0)
     new_data['rating'] = np.repeat(data['rating'],num_repeat,axis=0)
     
 

@@ -12,7 +12,7 @@ import numpy as np
 
 import deep_fairness.classification_model as models
 from deep_fairness.fairyted import Fairytale
-from deep_fairness.helper import load_pickle, sample_indices, cvt, make_minibatch, counterfactual_loss, calc_acc
+from deep_fairness.helper import load_pickle, sample_indices, cvt, make_minibatch, counterfactual_loss, calc_acc, MacOSFile
 
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
@@ -95,10 +95,10 @@ class Experiment(object):
     return trace
 
   def generate_counterfactual_data(self, trace, num_iter_cf):
-    data_with_u, cfsample = self.fairmodel.counterfactual_generate(trace, num_iter_cf)
+    data_with_u, cfsample = self.fairmodel.counterfactual_generate(trace, num_iter_cf=num_iter_cf)
     orig_concat_data, cf_concat_data = self.fairmodel.create_concat_data(data_with_u, cfsample)
     cf_filename = os.path.join(self.config['output_path'],self.config['counterfactual_data_filename'])
-    pickle.dump({'orig_concat_data':orig_concat_data, 'cf_concat_data':cf_concat_data}, open(cf_filename,'wb'))
+    pickle.dump({'orig_concat_data':orig_concat_data, 'cf_concat_data':cf_concat_data}, MacOSFile(open(cf_filename,'wb')))
     return orig_concat_data, cf_concat_data
 
   def load_counterfactual_data(self):
@@ -114,23 +114,29 @@ class Experiment(object):
     
     inputs = orig_concat_data['input'][test_idx,:]
     labels = orig_concat_data['label'][test_idx,:]
-
+    #print(inputs)
     with torch.set_grad_enabled(False):
       outputs = self.model(inputs)
       total_acc = calc_acc(outputs, labels)
-
+    #print(outputs)
     average_test_acc = np.mean(total_acc.numpy(),axis=0)
     print("Test Accuracy is :",average_test_acc)
     return average_test_acc
 
 
   def train_model(self, orig_concat_data, cf_concat_data, train_idx, dev_idx, 
-    max_epochs=10, max_iter=10, use_cf=True, minibatch_size=10):
+    max_epochs=10, max_iter=10, use_cf=False, minibatch_size=10):
+
+
+    
     since = time.time()
 
     best_model_wts = copy.deepcopy(self.model.state_dict())
 
     for epoch in range(max_epochs):
+      # print("max_epochs:",max_epochs)
+      # print("max_iter:",max_iter)
+      # print("use_cf",use_cf)
       print('Epoch {}/{}'.format(epoch, max_epochs - 1))
       print('-' * 10)
 
@@ -155,6 +161,7 @@ class Experiment(object):
           labels = orig_concat_data['label'][a_batch,:]
 
           if use_cf:
+            #print("hamba-------")
             cf_slice = cvt(a_batch)
             cf_inp = cf_concat_data['input'][cf_slice,:]
 
@@ -165,9 +172,15 @@ class Experiment(object):
           # track history if only in train
           with torch.set_grad_enabled(phase == 'train'):
             outputs = self.model(inputs)
+            # print('++++++++')
+            # print(inputs)
+            # print('--------')
+            # print(outputs)
+            # print('--------')
             loss = self.loss_fn(outputs, labels)
 
             if use_cf:
+              #print("hooo=====")
               cf_outputs = self.model(cf_inp)
               loss = loss+self.relu(self.cf_loss(cf_outputs,labels))
 

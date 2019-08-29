@@ -15,14 +15,14 @@ from deep_fairness.helper import load_pickle, dict_to_concat_data
 
 class Fairytale(object):
 
-  def __init__(self, data=None,u_dim=10):
+  def __init__(self, data=None,u_dim=1):
     super(Fairytale, self).__init__()
     self.u_dim = u_dim
     if data == None:
       self.simulated = True
       num_samples =100
-      trans_dim = 6
-      rating_dim = 5
+      trans_dim = 768
+      rating_dim = 14
       print('Generating samples from model')
       self.generator = model1(u_dim,trans_dim,rating_dim)
       self.data = self.generator.generate(num_samples)      
@@ -57,7 +57,7 @@ class Fairytale(object):
 
     print('Generating counterfactual_sample')
 
-    data_with_u, cfsample = counterfactual_sample(self.data,trace,self.u_dim, num_iter_cf)
+    data_with_u, cfsample = counterfactual_sample(self.data,trace,u_dim=self.u_dim, num_iter_cf=num_iter_cf)
     return data_with_u, cfsample
 
   def create_concat_data(self,data_with_u, cfsample):
