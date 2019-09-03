@@ -12,7 +12,7 @@
 
 
   "train_causal_model": False,
-  "input_filename": "doc2vec_50.pkl",
+  "input_filename": "doc2vec_100.pkl",
   "causal_model_filename": "trained_trace.pkl",
   "fit_params_arguments":{
     "nb_sample": 1000, 
@@ -34,8 +34,8 @@
   "gpu_num": -1,
   "model_type": "SimpleMLP",
   "model_params": {
-    "in_size": 59,
-    "hidden_size": 100,
+    "in_size": 109,
+    "hidden_size": 400,
     "out_size": 14,
     "dropout": 0.1
   },
@@ -62,7 +62,7 @@
   #  "momentum": 0.9
   #},
   "trainer_params":{
-    "max_epochs": 1000,
+    "max_epochs": 500,
     "max_iter": 15,
     "use_cf": True,
     "minibatch_size": 10

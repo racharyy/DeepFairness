@@ -10,6 +10,12 @@ import time
 import glob
 import torch.nn as nn
 
+def ab_ret(x,y):# x=a-b, y=a/b
+    b=x/(y-1)
+    a= b*y
+    return (a,b)
+
+
 def load_pickle(pickle_file):
     try:
         with open(pickle_file, 'rb') as f:
@@ -28,7 +34,7 @@ def dict_to_concat_data(data_dict):
     all_data_dict = {'input':[],'label':[]}
 
     for i in range(len(data_dict['a'])):
-        inp = np.concatenate((data_dict['transcript'][i],data_dict['a'][i],[0],data_dict['u'][i]))#data_dict['view'][i]
+        inp = np.concatenate((data_dict['transcript'][i],data_dict['a'][i],[data_dict['view'][i]],data_dict['u'][i]))#data_dict['view'][i]
         label = data_dict['rating'][i]
         all_data_dict['input'].append(inp)
         all_data_dict['label'].append(label)
