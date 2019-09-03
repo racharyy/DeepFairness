@@ -73,7 +73,7 @@ def calc_acc(model_output, target):
     # print(model_output.shape)
     print(x)
     y = torch.eq(x, target).float()
-    return y
+    return x,y
 
 import pickle
 

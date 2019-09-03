@@ -117,11 +117,11 @@ class Experiment(object):
     #print(inputs)
     with torch.set_grad_enabled(False):
       outputs = self.model(inputs)
-      total_acc = calc_acc(outputs, labels)
+      x,total_acc = calc_acc(outputs, labels)
     #print(outputs)
     average_test_acc = np.mean(total_acc.numpy(),axis=0)
     print("Test Accuracy is :",average_test_acc)
-    return average_test_acc
+    return x,average_test_acc
 
 
   def train_model(self, orig_concat_data, cf_concat_data, train_idx, dev_idx, 
@@ -280,7 +280,20 @@ class Experiment(object):
     if self.config['test_neural_network']:
       nn_filename = os.path.join(self.config['output_path'], self.config['load_nn_filename'])
       self.load_model(nn_filename)
-      self.test_model(orig_concat_data, test_idx)
+      op,average_test_acc = self.test_model(orig_concat_data, test_idx)
+      op = op.numpy()
+      inp =  orig_concat_data['input'][test_idx,:].numpy()
+      data_dict_predict, data_dict_true = {},{}
+      data_dict_true['transcript'] = inp[:,:200]
+      data_dict_true['a'] = inp[:,200:207]
+      data_dict_true['view'] = inp[:,207]
+      data_dict_true['rating'] = orig_concat_data['label'][test_idx,:].numpy()
+      data_dict_predict['transcript'] = inp[:,:200]
+      data_dict_predict['a'] = inp[:,200:207]
+      data_dict_predict['view'] = inp[:,207]
+      data_dict_predict['rating'] = op
+      with open('Output/test_output.pkl','wb') as f:
+        pickle.dump((data_dict_predict,data_dict_true),f)
 
 
     
