@@ -1,5 +1,5 @@
 {
-  "input_path": "Data/",
+  "input_path": "Data/doc2vec",
   "output_path": "Output/",
 
   # "trans_dim": 768,
@@ -12,7 +12,7 @@
 
 
   "train_causal_model": False,
-  "input_filename": "doc2vec_100.pkl",
+  "input_filename": "mydoc2vec_200.pkl",
   "causal_model_filename": "trained_trace.pkl",
   "fit_params_arguments":{
     "nb_sample": 1000, 
@@ -34,7 +34,7 @@
   "gpu_num": -1,
   "model_type": "SimpleMLP",
   "model_params": {
-    "in_size": 109,
+    "in_size": 218,
     "hidden_size": 400,
     "out_size": 14,
     "dropout": 0.1

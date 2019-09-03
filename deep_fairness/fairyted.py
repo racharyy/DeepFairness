@@ -15,7 +15,7 @@ from deep_fairness.helper import load_pickle, dict_to_concat_data
 
 class Fairytale(object):
 
-  def __init__(self, data=None,u_dim=1):
+  def __init__(self, data=None,u_dim=10):
     super(Fairytale, self).__init__()
     self.u_dim = u_dim
     if data == None:
