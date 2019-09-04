@@ -64,7 +64,9 @@ def counterfactual_loss(cf_outputs,labels,epsilon=0.1,span=11):
     n = len(cf_outputs)
 
     labels = labels.repeat_interleave(span, axis=0)
-    return (1.0/n)*(torch.norm(cf_outputs - labels)-epsilon)
+    op = (torch.abs(cf_outputs - labels)-epsilon)
+    #print(op)
+    return op
 
 
 def calc_acc(model_output, target):

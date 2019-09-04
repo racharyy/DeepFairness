@@ -182,7 +182,8 @@ class Experiment(object):
             if use_cf:
               #print("hooo=====")
               cf_outputs = self.model(cf_inp)
-              loss = loss+self.relu(self.cf_loss(cf_outputs,labels))
+              # print()
+              loss = loss+torch.mean(self.relu(self.cf_loss(cf_outputs,labels)))
 
             # backward + optimize only if in training phase
             if phase == 'train':

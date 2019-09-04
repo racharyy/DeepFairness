@@ -6,10 +6,10 @@ from helper import *
 import matplotlib.pyplot as plt
 
 
-data_frame = load_pickle('../Data/df_for_metric.pkl')
-#data_frame.head()
-data_frame = data_frame.iloc[:,2:]
-
+# data_frame = load_pickle('../Data/df_for_metric.pkl')
+# #data_frame.head()
+# data_frame = data_frame.iloc[:,2:]
+data_frame_predict, data_frame_true = load_pickle('../Output/metric_comparison.pkl')
 
 
 rating_names = ['beautiful', 'confusing', 'courageous', 'fascinating', 'funny', 'informative', 'ingenious', 'inspiring', 'jaw-dropping', 'longwinded', 'obnoxious', 'ok', 'persuasive', 'unconvincing']
@@ -40,14 +40,14 @@ priv_list = [[{'gender':0,'race':0}],
 
 #Data_set_list = [(,)]
 
-a_list, b_list = [], []
+a_list_predict, b_list_predict = [], []
 unpriv_label_list , priv_label_list = [], []
 for (u,p) in zip(unpriv_list,priv_list):
     cur_a, cur_b = [], []
     for label in rating_names:
         #print('Fairness Metric for the label------>',label.upper())
     
-        dataset  = StandardDataset(df=data_frame, label_name=label, favorable_classes=[1.0,1.0],
+        dataset  = StandardDataset(df=data_frame_predict, label_name=label, favorable_classes=[1.0,1.0],
                             protected_attribute_names=protected_attribute_names, privileged_classes=privileged_classes) 
         
        
@@ -61,8 +61,8 @@ for (u,p) in zip(unpriv_list,priv_list):
         cur_a.append(a)
         cur_b.append(b)
 
-    a_list.append(cur_a)
-    b_list.append(cur_b)
+    a_list_predict.append(cur_a)
+    b_list_predict.append(cur_b)
         #print("For Rating",label,"Difference in mean outcomes between unprivileged and privileged groups = %f" %diff)
 
     
@@ -74,38 +74,109 @@ for (u,p) in zip(unpriv_list,priv_list):
     unpriv_label_list.append(unpriv_label)
     priv_label_list.append(priv_label)
 
-a_list = np.array(a_list)
-b_list = np.array(b_list)
+a_list_predict = np.array(a_list_predict)
+b_list_predict = np.array(b_list_predict)
 
 
-# for i in range(14):
+a_list_true, b_list_true = [], []
+unpriv_label_list , priv_label_list = [], []
+for (u,p) in zip(unpriv_list,priv_list):
+    cur_a, cur_b = [], []
+    for label in rating_names:
+        #print('Fairness Metric for the label------>',label.upper())
+    
+        dataset  = StandardDataset(df=data_frame_true, label_name=label, favorable_classes=[1.0,1.0],
+                            protected_attribute_names=protected_attribute_names, privileged_classes=privileged_classes) 
+        
+       
+        dataset_metric = BinaryLabelDatasetMetric(dataset, unprivileged_groups=u, privileged_groups=p)
+        
 
-#     x= a_list[:,i]
-#     y= b_list[:,i]
-#     plt.subplot(3,5,i+1)
-#     plt.scatter(x,y)
-#     xax = np.linspace(0,1,100)
-#     plt.plot(xax,xax)
+
+        diff = dataset_metric.mean_difference()
+        ratio = dataset_metric.disparate_impact()
+        a,b = ab_ret(diff,ratio)
+        cur_a.append(a)
+        cur_b.append(b)
+
+    a_list_true.append(cur_a)
+    b_list_true.append(cur_b)
+        #print("For Rating",label,"Difference in mean outcomes between unprivileged and privileged groups = %f" %diff)
+
+    
+     
+
+    unpriv_label = '+'.join(['-'.join([prot_attr_dict[key][u_el[key]] for key in u_el]) for u_el in u])
+    priv_label = '+'.join(['-'.join([prot_attr_dict[key][p_el[key]] for key in p_el]) for p_el in p])
+
+    unpriv_label_list.append(unpriv_label)
+    priv_label_list.append(priv_label)
+
+a_list_true = np.array(a_list_true)
+b_list_true = np.array(b_list_true)
+
+
+for i in range(14):
+
+    x= a_list_predict[:,i]
+    y= b_list_predict[:,i]
+
+    z= a_list_true[:,i]
+    w= b_list_true[:,i]
+
+    plt.subplot(3,5,i+1)
+    plt.scatter(x,y,color='blue')
+    plt.scatter(z,w,color='red',label=rating_names[i])
+
+    for j in range(len(x)):
+        
+        plt.arrow(x[j],y[j],z[j]-x[j],w[j]-y[j],length_includes_head=True,head_width=0.03)
+
+    min_range = min(min(x),min(y),min(z),min(w))
+    max_range = max(max(x),max(y),max(z),max(w))
+    xax = np.linspace(min_range,max_range,100)
+    plt.plot(xax,xax)
+
+    #plt.legend()
     
 
-# plt.show()
+plt.show()
 
-for i in range(len(a_list)):
+# for i in range(len(a_list_true)):
 
-    xaxis = np.arange(14)
-    width = 0.3
+#     xaxis = np.arange(14)
+#     width = 0.3
 
-    fig, ax = plt.subplots()
-    rects1 = ax.bar(xaxis - width/2, a_list[i], width, label=unpriv_label_list[i])
-    rects2 = ax.bar(xaxis + width/2, b_list[i], width, label=priv_label_list[i])
+#     fig, ax = plt.subplots()
+#     rects1 = ax.bar(xaxis - width/2, a_list_true[i], width, label=unpriv_label_list[i])
+#     rects2 = ax.bar(xaxis + width/2, b_list_true[i], width, label=priv_label_list[i])
 
-    # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('Group Probability')
-    ax.set_title('Group Fairness for different Label')
-    ax.set_xticks(xaxis)
-    ax.set_xticklabels(rating_names,rotation=90)
-    ax.legend()
+#     # Add some text for labels, title and custom x-axis tick labels, etc.
+#     ax.set_ylabel('Group Probability before running classifier')
+#     ax.set_title('Group Fairness for different Label')
+#     ax.set_xticks(xaxis)
+#     ax.set_xticklabels(rating_names,rotation=90)
+#     ax.legend()
         
-    fig.tight_layout() 
+#     fig.tight_layout() 
 
-    plt.show()
+#     plt.show()
+
+
+#     xaxis = np.arange(14)
+#     width = 0.3
+
+#     fig, ax = plt.subplots()
+#     rects1 = ax.bar(xaxis - width/2, a_list_predict[i], width, label=unpriv_label_list[i])
+#     rects2 = ax.bar(xaxis + width/2, b_list_predict[i], width, label=priv_label_list[i])
+
+#     # Add some text for labels, title and custom x-axis tick labels, etc.
+#     ax.set_ylabel('Group Probability after running classifier')
+#     ax.set_title('Group Fairness for different Label')
+#     ax.set_xticks(xaxis)
+#     ax.set_xticklabels(rating_names,rotation=90)
+#     ax.legend()
+        
+#     fig.tight_layout() 
+
+#     plt.show()
