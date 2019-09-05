@@ -128,7 +128,7 @@ def pickle_load(file_path):
 
 
 def convert_dict_to_categorical(df):
-    # convert dataframe from one hot encoded to categorical for gender rance
+    # convert dataframe from one hot encoded dict to categorical for gender rance
     df_for_metric = pd.DataFrame({})
     df_for_metric['view'] = df['view']
     
@@ -173,7 +173,20 @@ def convert_dict_to_categorical(df):
         
     return df_for_metric
 
-
+def find_std_dev(pred_df, true_df):
+    # input: dataframes created by convert_dict_to_categorical containing 14 rating category columns
+    temp_pred = pred_df[['gender','race', 'beautiful', 'confusing',
+                              'courageous', 'fascinating', 'funny', 'informative', 'ingenious',
+                              'inspiring', 'jaw-dropping', 'longwinded', 'obnoxious', 'ok',
+                              'persuasive', 'unconvincing']]
+    temp_true = true_df[['gender','race', 'beautiful', 'confusing',
+                              'courageous', 'fascinating', 'funny', 'informative', 'ingenious',
+                              'inspiring', 'jaw-dropping', 'longwinded', 'obnoxious', 'ok',
+                              'persuasive', 'unconvincing']]
+    
+    pred_std = temp_pred.groupby(['gender','race']).mean().std().tolist()
+    truth_std = temp_true.groupby(['gender','race']).mean().std().tolist()
+    return pred_std, truth_std
 
 
 
