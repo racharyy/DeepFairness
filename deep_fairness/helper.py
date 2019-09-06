@@ -66,7 +66,7 @@ def make_minibatch(list_index, minibatch_size=10):
 def counterfactual_loss(cf_outputs,labels,epsilon=0.1,span=11):
     n = len(cf_outputs)
 
-    labels = labels.repeat_interleave(span, axis=0)
+    labels = labels.repeat_interleave(span, dim=0)
     op = (torch.abs(cf_outputs - labels)-epsilon)
     #print(op)
     return op
@@ -184,9 +184,15 @@ def find_std_dev(pred_df, true_df):
                               'inspiring', 'jaw-dropping', 'longwinded', 'obnoxious', 'ok',
                               'persuasive', 'unconvincing']]
     
-    pred_std = temp_pred.groupby(['gender','race']).mean().std().tolist()
-    truth_std = temp_true.groupby(['gender','race']).mean().std().tolist()
-    return pred_std, truth_std
+    pred_prob_mat = temp_pred.groupby(['gender','race']).mean()
+    truth_prob_mat = temp_true.groupby(['gender','race']).mean()
+
+    pred_std, truth_std = pred_prob_mat.std().values, truth_prob_mat.std().values
+    pred_mean, truth_mean = pred_prob_mat.mean().values, truth_prob_mat.mean().values
+    
+
+
+    return pred_std, truth_std, pred_mean, truth_mean, pred_prob_mat,truth_prob_mat
 
 
 

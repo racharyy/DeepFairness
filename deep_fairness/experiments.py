@@ -132,6 +132,7 @@ class Experiment(object):
     since = time.time()
 
     best_model_wts = copy.deepcopy(self.model.state_dict())
+    cf_loss_list = []
 
     for epoch in range(max_epochs):
       # print("max_epochs:",max_epochs)
@@ -150,7 +151,7 @@ class Experiment(object):
           indices = dev_idx
 
         running_loss = 0.0
-
+        cf_loss = 0
         # Iterate over data.
         for iter, a_batch in enumerate(make_minibatch(indices, minibatch_size)):
           
@@ -179,14 +180,17 @@ class Experiment(object):
             # print('--------')
             loss = self.loss_fn(outputs, labels)
 
-            if use_cf:
-              #print("hooo=====")
-              cf_outputs = self.model(cf_inp)
-              # print()
-              loss = loss+torch.mean(self.relu(self.cf_loss(cf_outputs,labels)))
+            
 
             # backward + optimize only if in training phase
             if phase == 'train':
+                if use_cf:
+                  #print("hooo=====")
+                  cf_outputs = self.model(cf_inp)
+                  # print()
+                  temp_cf_loss = torch.mean(self.relu(self.cf_loss(cf_outputs,labels)))
+                  loss = loss+ 2*temp_cf_loss
+                  cf_loss = cf_loss + temp_cf_loss
                 loss.backward()
                 self.optimizer.step()                
                 # try:
@@ -196,17 +200,23 @@ class Experiment(object):
 
           # statistics
           running_loss += loss.item()
+        if phase=='train':
+          cf_loss_list.append(cf_loss)
+
+          
 
         epoch_loss = running_loss / (max_iter * minibatch_size)
 
         print('{} Loss: {:.4f} '.format(phase, epoch_loss))
+        if use_cf:
+          print('{} Loss: {:.4f} '.format('cf', cf_loss))
 
         # deep copy the model
         if phase == 'val' and epoch_loss < self.best_loss:
           self.best_loss = epoch_loss
           best_model_wts = copy.deepcopy(self.model.state_dict())
 
-      print()
+      
 
     time_elapsed = time.time() - since
 
@@ -216,6 +226,8 @@ class Experiment(object):
 
     # load best model weights
     self.model.load_state_dict(best_model_wts)
+    with open('Output/loss_fn.pkl','wb') as f:
+      pickle.dump(cf_loss_list,f)
 
   def save_model(self, model_filepath):
     checkpoint = {
@@ -293,7 +305,7 @@ class Experiment(object):
       data_dict_predict['a'] = inp[:,200:207]
       data_dict_predict['view'] = inp[:,207]
       data_dict_predict['rating'] = op
-      with open('Output/test_output.pkl','wb') as f:
+      with open('Output/test_output_v2.pkl','wb') as f:
         pickle.dump((data_dict_predict,data_dict_true),f)
 
 
