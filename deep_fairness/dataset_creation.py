@@ -250,7 +250,7 @@ def plot_using_aif(df_predict,df_true):
 
 def cf_plot(df_predict,df_true,cf_loss_list):
 
-    pred_std, truth_std, pred_prob_mat, truth_prob_mat = find_std_dev(df_predict, df_true)
+    pred_std, truth_std,pred_mean, truth_mean, pred_prob_mat, truth_prob_mat = find_std_dev(df_predict, df_true)
     
     print(pred_std)
     print('======')
@@ -262,18 +262,25 @@ def cf_plot(df_predict,df_true,cf_loss_list):
     print('======')
     print(truth_prob_mat) 
 
-    plt.subplot(2,2,1) 
+    pred_mean = pred_mean + 0.00001
+    truth_mean = truth_mean + 0.00001
+    pred_cv = pred_std / pred_mean
+    truth_cv = truth_std / truth_mean
+
+
+    plt.subplot(1,2,1) 
     plt.plot(range(len(cf_loss_list)),cf_loss_list)
     plt.xlabel('Number of of Epochs')
     plt.ylabel('Counterfactual Loss')
 
-    plt.subplot(2,2,2)
-    plt.scatter(pred_std,truth_std)
+    plt.subplot(1,2,2)
+    plt.scatter(truth_cv,pred_cv)
     min_range = min(min(pred_std),min(truth_std))
     max_range = max(max(pred_std),max(truth_std))
-    line =np.linspace(min_range,max_range,100)
-    plt.xlabel('Std of the predicted label')
-    plt.ylabel('Std of the true label')
+    #line =np.linspace(min_range,max_range,100)
+    line =np.linspace(0,0.7,100)
+    plt.ylabel('CV of the predicted label')
+    plt.xlabel('CV of the true label')
     plt.plot(line,line)
 
     #plt.subplot(2,2,3)
@@ -372,7 +379,7 @@ def plot_cv(df_predict,df_true):
     min_range = min(min(pred_std),min(truth_std))
     max_range = max(max(pred_std),max(truth_std))
     #line =np.linspace(min_range,max_range,100)
-    line =np.linspace(0,1,100)
+    line =np.linspace(0,0.7,100)
     plt.ylabel('CV of the predicted label')
     plt.xlabel('CV of the true label')
     plt.plot(line,line)
@@ -383,10 +390,10 @@ def plot_cv(df_predict,df_true):
 
     plt.show()
 
-#cf_plot(data_frame_predict, data_frame_true,cf_list)
+cf_plot(data_frame_predict, data_frame_true,cf_list)
 #plot_using_aif(data_frame_predict, data_frame_true)
 
-scatter_plot_group(data_frame_predict, data_frame_true)
-# plot_cv(data_frame_predict, data_frame_true)
+#scatter_plot_group(data_frame_predict, data_frame_true)
+#plot_cv(data_frame_predict, data_frame_true)
 
 
